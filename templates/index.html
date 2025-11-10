@@ -1,97 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Double Pendulum</title>
-</head>
-<body>
-    <canvas id="pendulum-canvas" width="600" height="600" 
-            data-origin-x="{{ origin_x }}" data-origin-y="{{ origin_y }}"></canvas> <!-- initialises the canvas, and sets the starting coordinates -->
-    <script>
-      
-        const canvas = document.getElementById('pendulum-canvas');
-        const ctx = canvas.getContext('2d');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Double Pendulum Physics Simulation</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="simulation-container">
+      <canvas
+        id="pendulum-canvas"
+        width="600"
+        height="600"
+        data-origin-x="{{ origin_x }}"
+        data-origin-y="{{ origin_y }}"></canvas>
 
-        const ORIGIN_X = Number(canvas.getAttribute('data-origin-x')) || 300; //if you change the default values of the pendulum class, make sure to look at these.
-        const ORIGIN_Y = Number(canvas.getAttribute('data-origin-y')) || 100;
+      <div class="info-panel">
+        <div class="panel-section">
+          <h3>🔄 Simulation Status</h3>
+          <div class="status-text">
+            <span class="status-indicator" id="connection-status"></span>
+            <span id="status-text">Connecting...</span>
+          </div>
+          <div class="controls">
+            <button id="reset-btn" onclick="resetPendulum()">Reset</button>
+            <button id="pause-btn" onclick="togglePause()" class="secondary">
+              Pause
+            </button>
+          </div>
+          <div class="trail-toggle">
+            <input
+              type="checkbox"
+              id="trail-checkbox"
+              checked
+              onchange="toggleTrails()" />
+            <label for="trail-checkbox">Show motion trails</label>
+          </div>
+        </div>
 
-        function drawPendulum(coords) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // clears canvas
+        <div class="panel-section">
+          <h3>⚡ Energy Analysis</h3>
+          <div class="energy-display">
+            <div class="energy-item kinetic-energy">
+              <div class="energy-value" id="kinetic-energy">0.00</div>
+              <div class="energy-label">Kinetic (J)</div>
+            </div>
+            <div class="energy-item potential-energy">
+              <div class="energy-value" id="potential-energy">0.00</div>
+              <div class="energy-label">Potential (J)</div>
+            </div>
+            <div class="energy-item total-energy">
+              <div class="energy-value" id="total-energy">0.00</div>
+              <div class="energy-label">Total (J)</div>
+            </div>
+            <div class="energy-item">
+              <div class="energy-value" id="energy-error">0.00%</div>
+              <div class="energy-label">Conservation Error</div>
+            </div>
+          </div>
+        </div>
 
-            // Draw pivot
-            ctx.beginPath();
-            ctx.arc(ORIGIN_X, ORIGIN_Y, 4, 0, Math.PI * 2);
-            ctx.fillStyle = '#444';
-            ctx.fill();
+        <div class="panel-section">
+          <h3>⚙️ Physical Parameters</h3>
+          <div class="parameter-controls">
+            <div class="control-group">
+              <label for="length-1-input">Length 1 (px):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="length-1-input"
+                  min="50"
+                  max="200"
+                  value="120"
+                  step="5"
+                  onchange="updateParameter('length_rod_1', this.value)" />
+                <span class="parameter-value" id="length-1">120</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="length-2-input">Length 2 (px):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="length-2-input"
+                  min="50"
+                  max="200"
+                  value="120"
+                  step="5"
+                  onchange="updateParameter('length_rod_2', this.value)" />
+                <span class="parameter-value" id="length-2">120</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="mass-1-input">Mass 1 (kg):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="mass-1-input"
+                  min="1"
+                  max="50"
+                  value="10"
+                  step="1"
+                  onchange="updateParameter('mass_bob_1', this.value)" />
+                <span class="parameter-value" id="mass-1">10</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="mass-2-input">Mass 2 (kg):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="mass-2-input"
+                  min="1"
+                  max="50"
+                  value="10"
+                  step="1"
+                  onchange="updateParameter('mass_bob_2', this.value)" />
+                <span class="parameter-value" id="mass-2">10</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="gravity-input">Gravity (m/s²):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="gravity-input"
+                  min="0"
+                  max="20"
+                  value="9.81"
+                  step="0.5"
+                  onchange="updateParameter('g', this.value)" />
+                <span class="parameter-value" id="gravity">9.81</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            // Draw rods
-            ctx.beginPath();
-            ctx.moveTo(ORIGIN_X, ORIGIN_Y);
-            ctx.lineTo(coords[0].x, coords[0].y);
-            ctx.lineTo(coords[1].x, coords[1].y);
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        <div class="panel-section">
+          <h3>📊 Angular Motion</h3>
+          <div class="parameter-display">
+            <div class="parameter-item">
+              <span class="parameter-name">θ₁ (rad):</span>
+              <span class="parameter-value" id="theta-1">1.57</span>
+            </div>
+            <div class="parameter-item">
+              <span class="parameter-name">θ₂ (rad):</span>
+              <span class="parameter-value" id="theta-2">1.57</span>
+            </div>
+            <div class="parameter-item">
+              <span class="parameter-name">ω₁ (rad/s):</span>
+              <span class="parameter-value" id="omega-1">0.00</span>
+            </div>
+            <div class="parameter-item">
+              <span class="parameter-name">ω₂ (rad/s):</span>
+              <span class="parameter-value" id="omega-2">0.00</span>
+            </div>
+          </div>
+        </div>
 
-            // Draw bobs
-            for (let i = 0; i < coords.length; i++) {
-                ctx.beginPath();
-                ctx.arc(coords[i].x, coords[i].y, 10, 0, 2 * Math.PI);
-                ctx.fillStyle = i === 0 ? '#1976d2' : '#ef6c00';
-                ctx.fill();
-                ctx.strokeStyle = '#222';
-                ctx.stroke();
-            }
-        }
+        <div class="panel-section">
+          <h3>🎯 Initial Conditions</h3>
+          <div class="initial-conditions">
+            <div class="control-group">
+              <label for="theta-1-input">θ₁ (rad):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="theta-1-input"
+                  min="-3.14"
+                  max="3.14"
+                  value="1.57"
+                  step="0.1"
+                  onchange="updateInitialCondition('theta_1', this.value)" />
+                <span class="parameter-value" id="theta-1-display">1.57</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="theta-2-input">θ₂ (rad):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="theta-2-input"
+                  min="-3.14"
+                  max="3.14"
+                  value="1.57"
+                  step="0.1"
+                  onchange="updateInitialCondition('theta_2', this.value)" />
+                <span class="parameter-value" id="theta-2-display">1.57</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="omega-1-input">ω₁ (rad/s):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="omega-1-input"
+                  min="-5"
+                  max="5"
+                  value="0"
+                  step="0.1"
+                  onchange="updateInitialCondition('omega_1', this.value)" />
+                <span class="parameter-value" id="omega-1-display">0.0</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="omega-2-input">ω₂ (rad/s):</label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="omega-2-input"
+                  min="-5"
+                  max="5"
+                  value="0"
+                  step="0.1"
+                  onchange="updateInitialCondition('omega_2', this.value)" />
+                <span class="parameter-value" id="omega-2-display">0.0</span>
+              </div>
+            </div>
+          </div>
+          <div class="reset-controls">
+            <button onclick="setPreset('chaotic')">Chaotic Motion</button>
+            <button onclick="setPreset('simple')">Simple Pendulum</button>
+            <button onclick="setPreset('upright')" class="danger">
+              Unstable Upward
+            </button>
+            <button onclick="resetToDefaults()">Reset All</button>
+          </div>
+        </div>
 
-    let latestCoords = null;
-    const trail1 = [];
-    const trail2 = [];
-    const MAX_TRAIL = 300; // cap trail length
-        async function pollCoords() {
-            try {
-                const response = await fetch('/coords', { cache: 'no-store' });
-                if (response.ok) {
-                    latestCoords = await response.json();
-                }
-            } catch (e) {
-                // ignore fetch errors
-            }
-        }
+        <div class="panel-section">
+          <h3>🎯 System Info</h3>
+          <div class="parameter-display">
+            <div class="parameter-item">
+              <span class="parameter-name">FPS:</span>
+              <span class="parameter-value" id="fps">0</span>
+            </div>
+            <div class="parameter-item">
+              <span class="parameter-name">Trail Length:</span>
+              <span class="parameter-value" id="trail-length">0</span>
+            </div>
+            <div class="parameter-item">
+              <span class="parameter-name">Update Rate:</span>
+              <span class="parameter-value">~20Hz</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        function animate() {
-            if (latestCoords) {
-                // Update trails
-                trail1.push({ x: latestCoords[0].x, y: latestCoords[0].y });
-                trail2.push({ x: latestCoords[1].x, y: latestCoords[1].y });
-                if (trail1.length > MAX_TRAIL) trail1.shift();
-                if (trail2.length > MAX_TRAIL) trail2.shift();
-
-                // Draw scene
-                drawPendulum(latestCoords);
-
-                // Draw trails
-                const drawTrail = (trail, color) => {
-                    if (trail.length < 2) return;
-                    ctx.beginPath();
-                    ctx.moveTo(trail[0].x, trail[0].y);
-                    for (let i = 1; i < trail.length; i++) {
-                        ctx.lineTo(trail[i].x, trail[i].y);
-                    }
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 1.25;
-                    ctx.stroke();
-                };
-                drawTrail(trail1, 'rgba(25,118,210,0.7)');
-                drawTrail(trail2, 'rgba(239,108,0,0.7)');
-            }
-            requestAnimationFrame(animate);
-        }
-
-        // Start polling at ~20Hz and animate at display refresh rate
-        setInterval(pollCoords, 50);
-        requestAnimationFrame(animate);
-    </script>
-</body>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
 </html>

@@ -1,0 +1,291 @@
+/* Double Pendulum Physics Simulation Styles */
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  height: 100vh;
+}
+
+.simulation-container {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+canvas {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.info-panel {
+  width: 300px;
+  background: white;
+  border-left: 1px solid #ddd;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.panel-section {
+  margin-bottom: 24px;
+}
+
+.panel-section h3 {
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #eee;
+  color: #333;
+  font-size: 16px;
+}
+
+.energy-display {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.energy-item {
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.energy-value {
+  font-weight: bold;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.energy-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.kinetic-energy .energy-value {
+  color: #1976d2;
+}
+.potential-energy .energy-value {
+  color: #ef6c00;
+}
+.total-energy .energy-value {
+  color: #4caf50;
+}
+
+.parameter-display {
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.parameter-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.parameter-name {
+  color: #6c757d;
+}
+
+.parameter-value {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.controls button {
+  flex: 1;
+  padding: 8px 12px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.controls button:hover {
+  background: #1565c0;
+}
+
+.controls button.secondary {
+  background: #ef6c00;
+}
+
+.controls button.secondary:hover {
+  background: #e65100;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  margin-right: 6px;
+}
+
+.status-indicator.error {
+  background: #f44336;
+}
+
+.status-text {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.trail-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.trail-toggle input {
+  margin: 0;
+}
+
+.parameter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 2px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-container input[type="range"] {
+  flex: 1;
+  height: 20px;
+  background: transparent;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #1976d2;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-container input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #1976d2;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.initial-conditions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.initial-conditions .control-group {
+  margin-bottom: 0;
+}
+
+.reset-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.reset-controls button {
+  padding: 8px 12px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.reset-controls button:hover {
+  background: #5a6268;
+}
+
+.reset-controls button.danger {
+  background: #dc3545;
+}
+
+.reset-controls button.danger:hover {
+  background: #c82333;
+}
+
+/* Animation and transition effects */
+.energy-item {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.energy-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.controls button,
+.reset-controls button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.controls button:hover,
+.reset-controls button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .info-panel {
+    width: 250px;
+    padding: 15px;
+  }
+
+  .energy-display {
+    gap: 8px;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .initial-conditions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
