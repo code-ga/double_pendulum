@@ -301,6 +301,37 @@ function updateAngularDisplay(simulationState) {
   if (omega2El && omega2El.textContent !== (omega2 || 0).toFixed(2)) {
     omega2El.textContent = (omega2 || 0).toFixed(2);
   }
+
+  // Update Initial Conditions display values (theta-1-display, theta-2-display, omega-1-display, omega-2-display)
+  const theta1DisplayEl = document.getElementById("theta-1-display");
+  const theta2DisplayEl = document.getElementById("theta-2-display");
+  const omega1DisplayEl = document.getElementById("omega-1-display");
+  const omega2DisplayEl = document.getElementById("omega-2-display");
+
+  if (
+    theta1DisplayEl &&
+    theta1DisplayEl.textContent !== (theta1 || 0).toFixed(1)
+  ) {
+    theta1DisplayEl.textContent = (theta1 || 0).toFixed(1);
+  }
+  if (
+    theta2DisplayEl &&
+    theta2DisplayEl.textContent !== (theta2 || 0).toFixed(1)
+  ) {
+    theta2DisplayEl.textContent = (theta2 || 0).toFixed(1);
+  }
+  if (
+    omega1DisplayEl &&
+    omega1DisplayEl.textContent !== (omega1 || 0).toFixed(1)
+  ) {
+    omega1DisplayEl.textContent = (omega1 || 0).toFixed(1);
+  }
+  if (
+    omega2DisplayEl &&
+    omega2DisplayEl.textContent !== (omega2 || 0).toFixed(1)
+  ) {
+    omega2DisplayEl.textContent = (omega2 || 0).toFixed(1);
+  }
 }
 
 function updateParameterDisplays() {
